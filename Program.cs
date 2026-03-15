@@ -4,6 +4,9 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
+        var input = Console.In.ReadToEnd();
+        var config = new ParsedConfig(input);
+
+
     }
 }

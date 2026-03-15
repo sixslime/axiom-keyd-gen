@@ -4,25 +4,24 @@ using Tomlyn.Model;
 using Tomlyn;
 public record ParsedConfig
 {
-    public IReadOnlyCollection<Layer> Layers { get; }
+    public IReadOnlyCollection<Layer> AdditionalLayers { get; }
+    public Layer MainLayer { get; }
     public IReadOnlyDictionary<EKeyMod, string> ModifierAliases { get; }
     public ParsedConfig(string tomlText)
     {
         var model = TomlSerializer.Deserialize<TomlTable>(tomlText);
         if (model is null) throw new ProgramException("invalid toml?");
-        if (!model.TryGetValue("main", out var mainLayer))
+        if (!model.TryGetValue("main", out var mainLayerObj))
             throw new ProgramException("'main' key must be a table");
-        var layers = new List<Layer>()
-        {
-            ParseLayer(mainLayer, "main")
-        };
+        var mainLayer = ParseLayer(mainLayerObj, "main");
+        var additionalLayers = new List<Layer>();
         if (model.TryGetValue("layer", out var layerMappingObj))
         {
             if (layerMappingObj is not TomlTable layerMapping)
                 throw new ProgramException("'layer' key must be a table");
             foreach (var (layerKey, layerObj) in layerMapping)
             {
-                layers.Add(ParseLayer(layerObj, layerKey));
+                additionalLayers.Add(ParseLayer(layerObj, layerKey));
             }
         }
 
@@ -36,7 +35,8 @@ public record ParsedConfig
             modAliases.Add(ParseModString(modString), alias);
         }
 
-        Layers = layers.AsReadOnly();
+        MainLayer = mainLayer;
+        AdditionalLayers = additionalLayers.AsReadOnly();
         ModifierAliases = modAliases;
     }
 
