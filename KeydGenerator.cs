@@ -6,9 +6,12 @@ public static class KeydGenerator
     public static string Generate(ParsedConfig config)
     {
         var builder = new StringBuilder();
+        // not included in nixos config
+        /*
         builder
             .AppendLine("[ids]")
             .AppendLine("*");
+        */
         AppendLayer(config.MainLayer, builder);
         foreach (var additionalLayer in config.AdditionalLayers)
             AppendLayer(additionalLayer, builder);
